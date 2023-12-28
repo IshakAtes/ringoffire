@@ -1,0 +1,19 @@
+@import './../../styles.scss';
+
+.field {
+    width: 100vw;
+    height: 100vh;
+    max-width: 100%;
+    background-image: url('/assets/img/black-1072366_1280.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    @include allCenter();
+}
+
+.cardStack {
+    position: relative;
+    >img {
+        position: absolute;
+        width: 120px;
+    }
+}
