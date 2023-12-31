@@ -1,13 +1,12 @@
 import { Component, Input, OnChanges, OnInit } from '@angular/core';
 import {MatCardModule} from '@angular/material/card';
 import { CommonModule } from '@angular/common';
-import { GameComponent } from '../game/game.component';
 
 
 @Component({
   selector: 'app-game-info',
   standalone: true,
-  imports: [MatCardModule, CommonModule, GameComponent],
+  imports: [MatCardModule, CommonModule],
   templateUrl: './game-info.component.html',
   styleUrl: './game-info.component.scss'
 })
@@ -32,7 +31,6 @@ export class GameInfoComponent implements OnInit, OnChanges {
   description = '';
   @Input() card: any;
 
-  constructor() {}
 
   ngOnInit(): void {
     
