@@ -17,7 +17,6 @@ export class DialogAddPlayerComponent {
   name: string = '';
 
   onNoClick() {
-    console.log('hi');
   }
 
 
