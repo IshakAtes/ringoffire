@@ -1,6 +1,8 @@
 <mat-card>
-    <mat-card-title [ngStyle]="{'padding.px': 16}">{{ title }}</mat-card-title>
+    <mat-card-title [ngStyle]="{'padding.px': 16}">
+        {{ card ? title : 'Please pick a card' }}
+    </mat-card-title>
     <mat-card-content>
-        {{ description }}
+        {{ card ? description: 'Please click on the card stack to select the next card.' }}
     </mat-card-content>
 </mat-card>
