@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component} from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { Firestore, collection, collectionData } from '@angular/fire/firestore';
 import { Game } from '../../models/game';
 import { PlayerComponent } from '../player/player.component';
 import { MatButtonModule } from '@angular/material/button';
@@ -8,6 +9,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { DialogAddPlayerComponent } from '../dialog-add-player/dialog-add-player.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { GameInfoComponent } from '../game-info/game-info.component';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-game',
@@ -17,17 +19,36 @@ import { GameInfoComponent } from '../game-info/game-info.component';
   styleUrl: './game.component.scss'
 })
 export class GameComponent {
+  firestore: Firestore = inject(Firestore)
+  items$: Observable<any[]>;
   pickCardAnimation = false;
   currentCard: string | any = '';
   game: Game;
 
-  constructor(public dialog: MatDialog) {
+  constructor( public dialog: MatDialog) {
+    const aCollection = collection(this.firestore, 'games')
+    this.items$ = collectionData(aCollection);
     this.game = new Game()
     this.newGame();
+    console.log('update', this.items$.subscribe((g) => {
+      console.log('GameUpdate', g);
+    }));
   }
+
+  // ngOnInit(): void {
+  //   this.firestore.collection('games')
+  //   .valueChanges()
+  //   .subscribe((g) => {
+  //     console.log('Update', g)
+  //   });
+  // }
 
   newGame() {
     this.game = new Game();
+    // let fire = collection(this.firestore, 'games');
+    this.firestore
+    .collection('games')
+    .add({'Hallo': 'Welt'})
     console.log(this.game);
   }
 
