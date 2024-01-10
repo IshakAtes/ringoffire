@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
-import { Firestore, collection, collectionData } from '@angular/fire/firestore';
+import { Firestore, collectionData } from '@angular/fire/firestore';
 import { Game } from '../../models/game';
 import { PlayerComponent } from '../player/player.component';
 import { MatButtonModule } from '@angular/material/button';
@@ -10,6 +10,8 @@ import { DialogAddPlayerComponent } from '../dialog-add-player/dialog-add-player
 import { MatDialogModule } from '@angular/material/dialog';
 import { GameInfoComponent } from '../game-info/game-info.component';
 import { Observable } from 'rxjs';
+import { collection, addDoc } from "firebase/firestore";
+import { doc, deleteDoc } from "firebase/firestore"
 
 @Component({
   selector: 'app-game',
@@ -29,27 +31,22 @@ export class GameComponent {
     const aCollection = collection(this.firestore, 'games')
     this.items$ = collectionData(aCollection);
     this.game = new Game()
-    this.newGame();
     console.log('update', this.items$.subscribe((g) => {
       console.log('GameUpdate', g);
     }));
   }
 
-  // ngOnInit(): void {
-  //   this.firestore.collection('games')
-  //   .valueChanges()
-  //   .subscribe((g) => {
-  //     console.log('Update', g)
-  //   });
-  // }
+  ngOnInit(): void {
+    this.newGame();
+  }
 
-  newGame() {
+
+  async newGame() {
     this.game = new Game();
-    // let fire = collection(this.firestore, 'games');
-    this.firestore
-    .collection('games')
-    .add({'Hallo': 'Welt'})
-    console.log(this.game);
+    const docRef = await addDoc(collection(this.firestore, "games"), {
+      Hallo: "tokyo",
+    });
+    console.log("Document written with ID: ", docRef.id);
   }
 
   takeCard() {
