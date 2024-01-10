@@ -11,7 +11,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { GameInfoComponent } from '../game-info/game-info.component';
 import { Observable } from 'rxjs';
 import { collection, addDoc } from "firebase/firestore";
-import { doc, deleteDoc } from "firebase/firestore"
+import { doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
 
 @Component({
   selector: 'app-game',
@@ -25,12 +25,12 @@ export class GameComponent {
   items$: Observable<any[]>;
   pickCardAnimation = false;
   currentCard: string | any = '';
-  game: Game;
+  game: Game | any;
 
   constructor( public dialog: MatDialog) {
     const aCollection = collection(this.firestore, 'games')
     this.items$ = collectionData(aCollection);
-    this.game = new Game()
+    // this.game = new Game()
     console.log('update', this.items$.subscribe((g) => {
       console.log('GameUpdate', g);
     }));
@@ -44,7 +44,7 @@ export class GameComponent {
   async newGame() {
     this.game = new Game();
     const docRef = await addDoc(collection(this.firestore, "games"), {
-      Hallo: "tokyo",
+      gameObject: arrayUnion(this.game.toJson()),
     });
     console.log("Document written with ID: ", docRef.id);
   }
