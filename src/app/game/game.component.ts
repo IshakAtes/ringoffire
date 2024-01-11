@@ -71,10 +71,6 @@ export class GameComponent {
 
   async newGame() {
     this.game = new Game();
-    // const docRef = await addDoc(collection(this.firestore, "games"), {
-    //   gameObject: arrayUnion(this.game.toJson()),
-    // });
-    // console.log("Document written with ID: ", docRef.id);
   }
 
   takeCard() {
