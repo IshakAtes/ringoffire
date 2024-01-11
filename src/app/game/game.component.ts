@@ -10,8 +10,9 @@ import { DialogAddPlayerComponent } from '../dialog-add-player/dialog-add-player
 import { MatDialogModule } from '@angular/material/dialog';
 import { GameInfoComponent } from '../game-info/game-info.component';
 import { Observable } from 'rxjs';
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, setDoc, getDoc } from "firebase/firestore";
 import { doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-game',
@@ -27,7 +28,7 @@ export class GameComponent {
   currentCard: string | any = '';
   game: Game | any;
 
-  constructor( public dialog: MatDialog) {
+  constructor(private route: ActivatedRoute, public dialog: MatDialog) {
     const aCollection = collection(this.firestore, 'games')
     this.items$ = collectionData(aCollection);
     // this.game = new Game()
@@ -38,15 +39,42 @@ export class GameComponent {
 
   ngOnInit(): void {
     this.newGame();
+    this.route.params.subscribe(async (params) => {
+      console.log("id", params['id']);
+
+      // Verwende die Firestore-Instanz, um auf eine bestimmte Sammlung und ein Dokument zuzugreifen
+      const coll = collection(this.firestore, "games");
+      const docRef = doc(coll, params['id']);
+
+      try {
+        // Lese das Firestore-Dokument
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          // Extrahiere die Daten aus dem Dokument
+          const gameData: any = docSnap.data()['gameObject'][0];
+          this.game.currentPlayer = gameData.currentPlayer;
+          this.game.playedCards = gameData.playedCards;
+          this.game.players = gameData.players;
+          this.game.stack = gameData.stack;
+
+          console.log("Cu", docSnap.data()['gameObject'][0]);
+        } else {
+          console.log("Document does not exist");
+        }
+      } catch (error) {
+        console.error("Error reading document: ", error);
+      }
+    });
   }
 
 
   async newGame() {
     this.game = new Game();
-    const docRef = await addDoc(collection(this.firestore, "games"), {
-      gameObject: arrayUnion(this.game.toJson()),
-    });
-    console.log("Document written with ID: ", docRef.id);
+    // const docRef = await addDoc(collection(this.firestore, "games"), {
+    //   gameObject: arrayUnion(this.game.toJson()),
+    // });
+    // console.log("Document written with ID: ", docRef.id);
   }
 
   takeCard() {
