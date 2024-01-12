@@ -27,29 +27,27 @@ export class GameComponent {
   pickCardAnimation = false;
   currentCard: string | any = '';
   game: Game | any;
+  gameId: string | undefined;
 
   constructor(private route: ActivatedRoute, public dialog: MatDialog) {
     const aCollection = collection(this.firestore, 'games')
     this.items$ = collectionData(aCollection);
     // this.game = new Game()
-    console.log('update', this.items$.subscribe((g) => {
-      console.log('GameUpdate', g);
-    }));
+    // console.log('update', this.items$.subscribe((g) => {
+    //   console.log('GameUpdate', g);
+    // }));
   }
 
   ngOnInit(): void {
     this.newGame();
     this.route.params.subscribe(async (params) => {
-      console.log("id", params['id']);
-
+      this.gameId = params['id'];
       // Verwende die Firestore-Instanz, um auf eine bestimmte Sammlung und ein Dokument zuzugreifen
       const coll = collection(this.firestore, "games");
       const docRef = doc(coll, params['id']);
-
       try {
         // Lese das Firestore-Dokument
         const docSnap = await getDoc(docRef);
-
         if (docSnap.exists()) {
           // Extrahiere die Daten aus dem Dokument
           const gameData: any = docSnap.data()['gameObject'][0];
@@ -57,7 +55,6 @@ export class GameComponent {
           this.game.playedCards = gameData.playedCards;
           this.game.players = gameData.players;
           this.game.stack = gameData.stack;
-
           console.log("Cu", docSnap.data()['gameObject'][0]);
         } else {
           console.log("Document does not exist");
@@ -77,6 +74,7 @@ export class GameComponent {
     if (!this.pickCardAnimation) {
       this.currentCard = this.game.stack.pop();
       this.pickCardAnimation = true;
+      this.saveGame();
       console.log('Game is', this.game);
 
       this.game.currentPlayer++;
@@ -84,6 +82,7 @@ export class GameComponent {
       setTimeout(() => {
         this.pickCardAnimation = false;
         this.game.playedCards.push(this.currentCard);
+        this.saveGame();
       }, 1000);
     }
   }
@@ -95,7 +94,19 @@ export class GameComponent {
     dialogRef.afterClosed().subscribe(name => {
       if (name && name.length > 0) {
         this.game.players.push(name);
+        this.saveGame();
       }
+    });
+  }
+
+
+  async saveGame() {
+    const coll = collection(this.firestore, "games");
+    const docRef = doc(coll, this.gameId);
+    const updatedGameData = this.game.toJson();
+
+    await updateDoc(docRef, {
+      gameObject: [updatedGameData]
     });
   }
 
