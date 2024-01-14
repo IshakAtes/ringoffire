@@ -10,10 +10,8 @@ import { DialogAddPlayerComponent } from '../dialog-add-player/dialog-add-player
 import { MatDialogModule } from '@angular/material/dialog';
 import { GameInfoComponent } from '../game-info/game-info.component';
 import { Observable } from 'rxjs';
-import { collection, addDoc, setDoc, getDoc } from "firebase/firestore";
-import { doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
+import { collection, doc, updateDoc, onSnapshot  } from "firebase/firestore";
 import { ActivatedRoute } from '@angular/router';
-import { query, where, onSnapshot } from "firebase/firestore";
 
 @Component({
   selector: 'app-game',
@@ -27,7 +25,6 @@ export class GameComponent {
   items$: Observable<any[]>;
   game: Game | any;
   gameId: string | undefined;
-  gObject: [] = [];
 
   constructor(private route: ActivatedRoute, public dialog: MatDialog) {
     const aCollection = collection(this.firestore, 'games')
@@ -42,35 +39,20 @@ export class GameComponent {
     this.newGame();
     this.route.params.subscribe(async (params) => {
       this.gameId = params['id'];
-      // Verwende die Firestore-Instanz, um auf eine bestimmte Sammlung und ein Dokument zuzugreifen
-      const coll = collection(this.firestore, "games");
-      const docRef = doc(coll, params['id']);
-
-
-
       const unsub = onSnapshot(doc(this.firestore, "games", params['id']), (doc) => {
           console.log("Current data: ", doc.data());
-          try {
-            if (doc.exists()) {
-              // Extrahiere die Daten aus dem Dokument
-              const gameData: any = doc.data()['gameObject'][0];
-              this.game.currentPlayer = gameData.currentPlayer;
-              this.game.playedCards = gameData.playedCards;
-              this.game.players = gameData.players;
-              this.game.stack = gameData.stack;
-              this.game.pickCardAnimation = gameData.pickCardAnimation;
-              this.game.currentCard = gameData.currentCard;
-            } else {
-              console.log("Document does not exist");
-            }
-          } catch (error) {
-            console.error("Error reading document: ", error);
+          if (doc.exists()) {
+            // Extrahiere die Daten aus dem Dokument
+            const gameData: any = doc.data()['gameObject'][0];
+            this.game.currentPlayer = gameData.currentPlayer;
+            this.game.playedCards = gameData.playedCards;
+            this.game.players = gameData.players;
+            this.game.stack = gameData.stack;
+            this.game.pickCardAnimation = gameData.pickCardAnimation;
+            this.game.currentCard = gameData.currentCard;
+          } else {
+            console.log("Document does not exist");
           }
-
-
-
-
-
       });
     });
   }
