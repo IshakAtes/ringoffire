@@ -13,6 +13,7 @@ import { Observable } from 'rxjs';
 import { collection, addDoc, setDoc, getDoc } from "firebase/firestore";
 import { doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
 import { ActivatedRoute } from '@angular/router';
+import { query, where, onSnapshot } from "firebase/firestore";
 
 @Component({
   selector: 'app-game',
@@ -24,10 +25,9 @@ import { ActivatedRoute } from '@angular/router';
 export class GameComponent {
   firestore: Firestore = inject(Firestore)
   items$: Observable<any[]>;
-  pickCardAnimation = false;
-  currentCard: string | any = '';
   game: Game | any;
   gameId: string | undefined;
+  gObject: [] = [];
 
   constructor(private route: ActivatedRoute, public dialog: MatDialog) {
     const aCollection = collection(this.firestore, 'games')
@@ -45,23 +45,33 @@ export class GameComponent {
       // Verwende die Firestore-Instanz, um auf eine bestimmte Sammlung und ein Dokument zuzugreifen
       const coll = collection(this.firestore, "games");
       const docRef = doc(coll, params['id']);
-      try {
-        // Lese das Firestore-Dokument
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          // Extrahiere die Daten aus dem Dokument
-          const gameData: any = docSnap.data()['gameObject'][0];
-          this.game.currentPlayer = gameData.currentPlayer;
-          this.game.playedCards = gameData.playedCards;
-          this.game.players = gameData.players;
-          this.game.stack = gameData.stack;
-          console.log("Cu", docSnap.data()['gameObject'][0]);
-        } else {
-          console.log("Document does not exist");
-        }
-      } catch (error) {
-        console.error("Error reading document: ", error);
-      }
+
+
+
+      const unsub = onSnapshot(doc(this.firestore, "games", params['id']), (doc) => {
+          console.log("Current data: ", doc.data());
+          try {
+            if (doc.exists()) {
+              // Extrahiere die Daten aus dem Dokument
+              const gameData: any = doc.data()['gameObject'][0];
+              this.game.currentPlayer = gameData.currentPlayer;
+              this.game.playedCards = gameData.playedCards;
+              this.game.players = gameData.players;
+              this.game.stack = gameData.stack;
+              this.game.pickCardAnimation = gameData.pickCardAnimation;
+              this.game.currentCard = gameData.currentCard;
+            } else {
+              console.log("Document does not exist");
+            }
+          } catch (error) {
+            console.error("Error reading document: ", error);
+          }
+
+
+
+
+
+      });
     });
   }
 
@@ -71,17 +81,16 @@ export class GameComponent {
   }
 
   takeCard() {
-    if (!this.pickCardAnimation) {
-      this.currentCard = this.game.stack.pop();
-      this.pickCardAnimation = true;
-      this.saveGame();
+    if (!this.game.pickCardAnimation) {
+      this.game.currentCard = this.game.stack.pop();
+      this.game.pickCardAnimation = true;
       console.log('Game is', this.game);
-
       this.game.currentPlayer++;
       this.game.currentPlayer = this.game.currentPlayer % this.game.players.length;
+      this.saveGame();
       setTimeout(() => {
-        this.pickCardAnimation = false;
-        this.game.playedCards.push(this.currentCard);
+        this.game.playedCards.push(this.game.currentCard);
+        this.game.pickCardAnimation = false;
         this.saveGame();
       }, 1000);
     }
