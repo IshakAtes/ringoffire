@@ -2,8 +2,7 @@ import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { GameComponent } from '../game/game.component';
 import { Game } from '../../models/game';
-import { collection, addDoc, setDoc, getDoc } from "firebase/firestore";
-import { doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
+import { collection, addDoc, arrayUnion } from "firebase/firestore";
 import { Firestore } from '@angular/fire/firestore';
 
 @Component({
